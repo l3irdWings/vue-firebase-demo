@@ -90,6 +90,13 @@ export default {
     return {
       msg: 'Welcome to Your Vue.js App'
     }
+  },
+  created () {
+    let self = this
+    this.$firebase.database().ref(`/message/welcome`).once('value').then(snapshot => {
+      console.log(snapshot.val())
+      self.msg = `${snapshot.val()} ${self.msg}`
+    })
   }
 }
 </script>

@@ -1,6 +1,8 @@
 <template>
   <div id="app">
     <img src="./assets/logo.png">
+    <span>+</span>
+    <img src="./assets/firebase.png">
     <router-view/>
   </div>
 </template>

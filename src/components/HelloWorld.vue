@@ -1,85 +1,13 @@
 <template>
   <div class="hello">
-    <h1>{{ msg }}</h1>
-    <h2>Essential Links</h2>
-    <ul>
-      <li>
-        <a
-          href="https://vuejs.org"
-          target="_blank"
-        >
-          Core Docs
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://forum.vuejs.org"
-          target="_blank"
-        >
-          Forum
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://chat.vuejs.org"
-          target="_blank"
-        >
-          Community Chat
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://twitter.com/vuejs"
-          target="_blank"
-        >
-          Twitter
-        </a>
-      </li>
-      <br>
-      <li>
-        <a
-          href="http://vuejs-templates.github.io/webpack/"
-          target="_blank"
-        >
-          Docs for This Template
-        </a>
-      </li>
-    </ul>
-    <h2>Ecosystem</h2>
-    <ul>
-      <li>
-        <a
-          href="http://router.vuejs.org/"
-          target="_blank"
-        >
-          vue-router
-        </a>
-      </li>
-      <li>
-        <a
-          href="http://vuex.vuejs.org/"
-          target="_blank"
-        >
-          vuex
-        </a>
-      </li>
-      <li>
-        <a
-          href="http://vue-loader.vuejs.org/"
-          target="_blank"
-        >
-          vue-loader
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/awesome-vue"
-          target="_blank"
-        >
-          awesome-vue
-        </a>
-      </li>
-    </ul>
+    <!--<pre>{{ messageObject }}</pre>-->
+    <div>
+      <div v-for="message in messages" v-bind:key="message.id">
+        <h2><b-badge>{{ message.message }}</b-badge></h2>
+      </div>
+    </div>
+    <b-form-input id="new_message_input" type="text" v-model="newMessage" required placeholder="Write Comment"></b-form-input>
+    <b-button v-on:click="addMessage()">Send</b-button>
   </div>
 </template>
 
@@ -88,15 +16,57 @@ export default {
   name: 'HelloWorld',
   data () {
     return {
-      msg: 'Welcome to Your Vue.js App'
+      msg: 'Welcome to Your Vue.js App',
+      messages: [],
+      newMessage: ''
     }
   },
   created () {
     let self = this
-    this.$firebase.database().ref(`/message/welcome`).once('value').then(snapshot => {
-      console.log(snapshot.val())
-      self.msg = `${snapshot.val()} ${self.msg}`
+
+    this.$firebase.database().ref('message').once('value').then(snapshot => {
+      snapshot.forEach(function (messageSnapshot) {
+        let message = messageSnapshot.val()
+        message.id = messageSnapshot.key
+        console.log(messageSnapshot.key)
+        self.messages.push(message)
+      })
+      observeMessage()
     })
+
+    function observeMessage () {
+      self.$firebase.database().ref('message').on('child_added', snapshot => {
+        const index = self.messages.findIndex(message => message.id === snapshot.key)
+        console.log(index)
+        console.log(snapshot.key + 'ADDED')
+        if (index === -1) {
+          let message = snapshot.val()
+          message.id = snapshot.key
+          self.messages.push(message)
+        }
+      })
+
+      self.$firebase.database().ref('message').on('child_changed', snapshot => {
+        const index = self.messages.findIndex(message => message.id === snapshot.key)
+        if (index >= 0) {
+          self.messages[index] = snapshot.val()
+        }
+      })
+
+      self.$firebase.database().ref('message').on('child_removed', snapshot => {
+        const index = self.messages.findIndex(message => message.id === snapshot.key)
+        if (index >= 0) {
+          self.messages.splice(index, 1)
+        }
+      })
+    }
+  },
+  methods: {
+    addMessage () {
+      this.$firebase.database().ref('message').push({
+        message: this.newMessage
+      })
+    }
   }
 }
 </script>
@@ -116,5 +86,9 @@ li {
 }
 a {
   color: #42b983;
+}
+input {
+  width: 400px;
+  margin: 10px auto;
 }
 </style>

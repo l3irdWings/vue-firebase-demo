@@ -1,19 +1,30 @@
 <template>
-  <div class="hello">
-    <!--<pre>{{ messageObject }}</pre>-->
-    <div>
-      <div v-for="message in messages" v-bind:key="message.id">
-        <h2><b-badge>{{ message.message }}</b-badge></h2>
-      </div>
-    </div>
-    <b-form-input id="new_message_input" type="text" v-model="newMessage" required placeholder="Write Comment"></b-form-input>
-    <b-button v-on:click="addMessage()">Send</b-button>
+  <div class="database">
+    <h1><b>Database</b></h1>
+    <b-container>
+      <b-row>
+        <b-col id="input_col">
+          <div id="new_message_div">
+            <img src="./../assets/logo.png">
+            <span>+</span>
+            <img src="./../assets/firebase.png">
+            <b-form-input id="new_message_input" type="text" v-model="newMessage" required placeholder="Write Comment"></b-form-input>
+            <b-button id="new_message_button" v-on:click="addMessage()">Send</b-button>
+          </div>
+        </b-col>
+        <b-col id="output_col">
+          <div id="messages_div">
+            <b-badge v-for="message in messages" v-bind:key="message['.key']"><h4>{{ message.message }}</h4></b-badge>
+          </div>
+        </b-col>
+      </b-row>
+    </b-container>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'HelloWorld',
+  name: 'database',
   data () {
     return {
       msg: 'Welcome to Your Vue.js App',
@@ -66,29 +77,55 @@ export default {
       this.$firebase.database().ref('message').push({
         message: this.newMessage
       })
+      this.newMessage = ''
     }
   }
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h1, h2 {
-  font-weight: normal;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
-input {
-  width: 400px;
-  margin: 10px auto;
-}
+  ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  li {
+    display: inline-block;
+    margin: 0 10px;
+  }
+  span.badge {
+    margin-right: 10px;
+    margin-bottom: 10px;
+  }
+  #input_col {
+    position: relative;
+    height: 500px;
+  }
+  #new_message_div {
+    position: absolute;
+    top: 50%;
+    left: 20px;
+    right: 20px;
+    height: 320px;
+    margin-top: -160px;
+  }
+  #new_message_input {
+    margin-top: 10px;
+    height: 50px;
+  }
+  #new_message_button {
+    height: 50px;
+    margin-top: 10px;
+  }
+  #output_col {
+    position: relative;
+    height: 500px;
+  }
+  #messages_div {
+    position: absolute;
+    top: 50%;
+    left: 20px;
+    right: 20px;
+    height: 320px;
+    margin-top: -160px;
+  }
 </style>

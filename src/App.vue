@@ -42,4 +42,29 @@ export default {
   h1 {
     color: #ffffff;
   }
+
+  #left_col {
+    position: relative;
+    height: 500px;
+  }
+  #left_inside_div {
+    position: absolute;
+    top: 50%;
+    left: 20px;
+    right: 20px;
+    height: 320px;
+    margin-top: -160px;
+  }
+  #right_col {
+    position: relative;
+    height: 500px;
+  }
+  #right_inside_div {
+    position: absolute;
+    top: 50%;
+    left: 20px;
+    right: 20px;
+    height: 320px;
+    margin-top: -160px;
+  }
 </style>

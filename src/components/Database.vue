@@ -6,7 +6,6 @@
         <b-col id="input_col">
           <div id="new_message_div">
             <img src="./../assets/logo.png">
-            <span>+</span>
             <img src="./../assets/firebase.png">
             <b-form-input id="new_message_input" type="text" v-model="newMessage" required placeholder="Write Comment"></b-form-input>
             <b-button id="new_message_button" v-on:click="addMessage()">Send</b-button>
@@ -14,7 +13,7 @@
         </b-col>
         <b-col id="output_col">
           <div id="messages_div">
-            <b-badge v-for="message in messages" v-bind:key="message['.key']"><h4>{{ message.message }}</h4></b-badge>
+            <b-badge v-for="message in messages" v-bind:key="message.id"><h4>{{ message.message }}</h4></b-badge>
           </div>
         </b-col>
       </b-row>
@@ -39,7 +38,6 @@ export default {
       snapshot.forEach(function (messageSnapshot) {
         let message = messageSnapshot.val()
         message.id = messageSnapshot.key
-        console.log(messageSnapshot.key)
         self.messages.push(message)
       })
       observeMessage()
@@ -48,8 +46,6 @@ export default {
     function observeMessage () {
       self.$firebase.database().ref('message').on('child_added', snapshot => {
         const index = self.messages.findIndex(message => message.id === snapshot.key)
-        console.log(index)
-        console.log(snapshot.key + 'ADDED')
         if (index === -1) {
           let message = snapshot.val()
           message.id = snapshot.key
@@ -95,6 +91,7 @@ export default {
   span.badge {
     margin-right: 10px;
     margin-bottom: 10px;
+    padding: 10px 10px 0;
   }
   #input_col {
     position: relative;

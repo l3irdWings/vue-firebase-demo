@@ -36,14 +36,9 @@ export default {
       snapshot.forEach(function (imageSnapshot) {
         let image = imageSnapshot.val()
         image.id = imageSnapshot.key
-        self.$firebase.storage().refFromURL(image.storage_location).getDownloadURL().then(url => {
-          image.url = url
-          self.images.push(image)
-          if (self.images.length === snapshot.numChildren()) {
-            observeImage()
-          }
-        })
+        self.images.push(image)
       })
+      observeImage()
     })
 
     function observeImage () {
@@ -52,10 +47,7 @@ export default {
         if (index === -1) {
           let image = snapshot.val()
           image.id = snapshot.key
-          self.$firebase.storage().refFromURL(image.storage_location).getDownloadURL().then(url => {
-            image.url = url
-            self.images.push(image)
-          })
+          self.images.push(image)
         }
       })
 
@@ -73,12 +65,27 @@ export default {
   methods: {
     uploadImage () {
       let self = this
-      this.$firebase.storage().ref(`/image/${this.newImage.name}`).put(this.newImage).then(function () {
-        // Upload completed successfully, now we can get the download URL
-        self.$firebase.database().ref('image').push({
-          storage_location: `gs://${self.$firebase.storage().ref().bucket}/image/${self.newImage.name}`
-        })
-      })
+      let task = this.$firebase.storage().ref(`/image/${this.newImage.name}`).put(this.newImage)
+      task.on('state_changed',
+        function progress (snapshot) {
+          let percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+          console.log(`Upload is ${percentage}% done`)
+        },
+        function error (err) {
+          console.log(err)
+        },
+        function complete () {
+          console.log('complete upload')
+          // Upload completed successfully, now we can get the download URL
+          const storageLocation = `gs://${self.$firebase.storage().ref().bucket}/image/${self.newImage.name}`
+          self.$firebase.storage().refFromURL(storageLocation).getDownloadURL().then(url => {
+            self.$firebase.database().ref('image').push({
+              storage_location: storageLocation,
+              url: url
+            })
+          })
+        }
+      )
     }
   }
 }

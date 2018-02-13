@@ -1,6 +1,6 @@
 <template>
-  <div class="database">
-    <h1><b>Database</b></h1>
+  <div class="firestore">
+    <h1><b>Firestore</b></h1>
     <b-container>
       <b-row>
         <b-col id="left_col">
@@ -23,7 +23,7 @@
 
 <script>
 export default {
-  name: 'database',
+  name: 'firestore',
   data () {
     return {
       messages: [],
@@ -33,46 +33,41 @@ export default {
   created () {
     let self = this
 
-    this.$firebase.database().ref('message').once('value').then(snapshot => {
-      snapshot.forEach(function (messageSnapshot) {
-        let message = messageSnapshot.val()
-        message.id = messageSnapshot.key
+    this.$firebase.firestore().collection('message').get().then(snapshot => {
+      snapshot.forEach(function (messageDoc) {
+        let message = messageDoc.data()
+        message.id = messageDoc.id
         self.messages.push(message)
       })
       observeMessage()
     })
 
     function observeMessage () {
-      self.$firebase.database().ref('message').on('child_added', snapshot => {
-        const index = self.messages.findIndex(message => message.id === snapshot.key)
-        if (index === -1) {
-          let message = snapshot.val()
-          message.id = snapshot.key
-          self.messages.push(message)
-        }
-      })
+      self.$firebase.firestore().collection('message').onSnapshot(snapshot => {
+        snapshot.docChanges.forEach(function (change) {
+          const index = self.messages.findIndex(message => message.id === change.doc.id)
 
-      self.$firebase.database().ref('message').on('child_changed', snapshot => {
-        const index = self.messages.findIndex(message => message.id === snapshot.key)
-        if (index >= 0) {
-          let message = snapshot.val()
-          message.id = snapshot.key
-          self.messages[index] = message
-        }
-      })
-
-      self.$firebase.database().ref('message').on('child_removed', snapshot => {
-        const index = self.messages.findIndex(message => message.id === snapshot.key)
-        if (index >= 0) {
-          self.messages.splice(index, 1)
-        }
+          if (change.type === 'added' && index === -1) {
+            let message = change.doc.data()
+            message.id = change.doc.id
+            self.messages.push(message)
+          }
+          if (change.type === 'modified' && index >= 0) {
+            let message = change.doc.data()
+            message.id = change.doc.id
+            self.messages[index] = message
+          }
+          if (change.type === 'removed' && index >= 0) {
+            self.messages.splice(index, 1)
+          }
+        })
       })
     }
   },
   methods: {
     addMessage () {
       if (this.newMessage !== '') {
-        this.$firebase.database().ref('message').push({
+        this.$firebase.firestore().collection('message').add({
           message: this.newMessage
         })
         this.newMessage = ''
@@ -116,4 +111,5 @@ export default {
     height: 50px;
     margin-top: 10px;
   }
+
 </style>

@@ -14,6 +14,7 @@
               <b-navbar-nav>
                 <b-nav-item to="database">Database</b-nav-item>
                 <b-nav-item to="storage">Storage</b-nav-item>
+                <b-nav-item to="firestore">Firestore</b-nav-item>
               </b-navbar-nav>
 
             </b-collapse>

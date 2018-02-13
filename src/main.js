@@ -17,6 +17,8 @@ let config = {
   messagingSenderId: '967017213223'
 }
 
+require('firebase/firestore')
+
 Vue.config.productionTip = false
 
 Vue.use(BootstrapVue)

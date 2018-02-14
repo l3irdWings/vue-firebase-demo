@@ -7,13 +7,10 @@
           <div id="left_inside_div">
             <img src="./../assets/logo.png">
             <img src="./../assets/firebase.png">
-            <b-form-input id="new_message_input" v-model="newMessage" required placeholder="Write Comment"></b-form-input>
-            <b-button id="new_message_button" v-on:click="addMessage()">Send</b-button>
           </div>
         </b-col>
         <b-col id="right_col">
           <div id="right_inside_div">
-            <b-badge v-for="message in messages" v-bind:key="message.id"><h4>{{ message.message | to-uppercase }}</h4></b-badge>
           </div>
         </b-col>
       </b-row>
@@ -24,23 +21,7 @@
 <script>
 export default {
   name: 'firestore',
-  data () {
-    return {
-      messages: [],
-      newMessage: ''
-    }
-  },
   created () {
-    let self = this
-
-    this.$firebase.firestore().collection('message').get().then(snapshot => {
-      snapshot.forEach(function (messageDoc) {
-        let message = messageDoc.data()
-        message.id = messageDoc.id
-        self.messages.push(message)
-      })
-      observeMessage()
-    })
 
     function observeMessage () {
       self.$firebase.firestore().collection('message').onSnapshot(snapshot => {
@@ -63,28 +44,6 @@ export default {
         })
       })
     }
-  },
-  methods: {
-    addMessage () {
-      if (this.newMessage !== '') {
-        this.$firebase.firestore().collection('message').add({
-          message: this.newMessage
-        })
-        this.newMessage = ''
-      }
-    }
-  },
-  filters: {
-    toUppercase (value) {
-      return value.toString().toUpperCase()
-    }
-  },
-  mounted () {
-    window.addEventListener('keyup', event => {
-      if (event.keyCode === 13) {
-        this.addMessage()
-      }
-    })
   }
 }
 </script>
